@@ -1,7 +1,7 @@
 const express = require('express');
 const Users = require('./users-model')
 const Posts = require('../posts/posts-model');
-const { validateUserId } = require('../middleware/middleware');
+const { validateUserId,  validateUser, validatePost } = require('../middleware/middleware');
 
 const router = express.Router();
 
@@ -17,15 +17,24 @@ router.get('/:id', validateUserId, (req, res) => {
   res.status(200).json(req.user)
 });
 
-router.post('/', (req, res) => {
-  // RETURN THE NEWLY CREATED USER OBJECT
-  // this needs a middleware to check that the request body is valid
+router.post('/', validateUser, (req, res, next) => {
+  Users.insert(req.user)
+    .then(newUser => {
+      res.status(201).json(newUser)
+    })
+    .catch(next)
 });
 
-router.put('/:id', (req, res) => {
-  // RETURN THE FRESHLY UPDATED USER OBJECT
-  // this needs a middleware to verify user id
-  // and another middleware to check that the request body is valid
+router.put('/:id', validateUserId, validateUser, (req, res, next) => {
+  Users.update(req.params.id, req.user)
+    .then(updatedUser => {
+      Users.getById(req.params.id)
+        .then(db => {
+          res.status(200).json(db)
+        })
+        .catch(next)
+    })
+    .catch(next)
 });
 
 router.delete('/:id', (req, res) => {

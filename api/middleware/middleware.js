@@ -51,5 +51,5 @@ module.exports = {
   logger,
   validateUserId,
   validateUser,
-  validatePost
+  validatePost,
 }
